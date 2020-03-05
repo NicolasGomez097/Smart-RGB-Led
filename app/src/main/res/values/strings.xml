@@ -1,3 +1,26 @@
 <resources>
     <string name="app_name">Programable RGB LED</string>
+    <string name="openDetect">Detect Lights</string>
+    <string name="changePattern">Change Pattern</string>
+    <string name="ConfigBluetooth">Bluetooth Config</string>
+    <string name="turn_on_Bluetooth">Turn on Bluetooth?</string>
+    <string name="turn_on">Turn ON</string>
+    <string name="cancel">Cancel</string>
+    <string name="shared_preference">RGBLeds</string>
+    <string name="save_btn_txt">SAVE</string>
+    <string name="on_start_up_turn_on">Turn ON Bluetooth on start up.</string>
+    <string name="status">Status</string>
+    <string name="disconected">Disconected</string>
+    <string name="connect_btn">CONNECT</string>
+    <string name="bluetooth_enable">Bluetooth enabled</string>
+    <string name="pair_device">Pair device first</string>
+    <string name="connection_established">Connection established</string>
+    <string name="connection_not_established">Connection not established</string>
+    <string name="establishing_connection">Establishing connection...</string>
+    <string name="established">Established</string>
+    <string name="disconnect_btn">Disconnect</string>
+    <string name="could_not_turn_off">Could not turn OFF</string>
+    <string name="turned_off">Turned OFF</string>
+    <string name="turned_on">Turned ON</string>
+    <string name="could_not_turn_on">Could not turn ON</string>
 </resources>

@@ -61,3 +61,9 @@ int RS_KERNEL rgb_to_int(uchar4 in)
     return color;
 }
 
+rs_allocation input;
+rs_allocation output;
+
+uchar4 RS_KERNEL yuv_to_rgb(uchar in, uint32_t x, uint32_t y){
+
+}
