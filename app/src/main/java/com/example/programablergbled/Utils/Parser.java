@@ -24,4 +24,8 @@ public class Parser {
 
         return Integer.toString(b & 0xff);
     }
+
+    public int parseRange(int value, int min, int max, int newMin, int newMax){
+        return newMin+((value-min)*(newMax-newMin))/(max-min);
+    }
 }

@@ -84,9 +84,11 @@ public class FragmentPattern extends Fragment {
                         .show(new ColorPickerPopup.ColorPickerObserver() {
                     @Override
                     public void onColorPicked(int color) {
-                        red.setText(""+Color.red(color));
-                        green.setText(""+Color.green(color));
-                        blue.setText(""+Color.blue(color));
+                        float hsv[] = new float[3];
+                        Color.colorToHSV(color,hsv);
+                        red.setText(""+hsv[0]);
+                        green.setText(""+hsv[1]);
+                        blue.setText(""+hsv[2]);
                     }
                 });
             }
@@ -132,9 +134,9 @@ public class FragmentPattern extends Fragment {
     private void encederLeds() {
         Leds l = new Leds(4);
         int i = Integer.parseInt(index.getText().toString());
-        int r = Integer.parseInt(red.getText().toString());
+        /*int r = Integer.parseInt(red.getText().toString());
         int g = Integer.parseInt(green.getText().toString());
-        int b = Integer.parseInt(blue.getText().toString());
+        int b = Integer.parseInt(blue.getText().toString());*/
         if(i > 3)
             i = 3;
         if(i < 0)

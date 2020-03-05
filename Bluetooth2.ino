@@ -186,9 +186,9 @@ void patronReconocimineto(){
     }
     rest = aux%2;
     if(rest == 1)
-      setColor(i,CRGB(0,50,0));
+      setColor(i,CRGB(0,150,0));
     else
-      setColor(i,CRGB(50,0,0));
+      setColor(i,CRGB(150,0,0));
   }
   FastLED.show();
   isDetecting = false;
