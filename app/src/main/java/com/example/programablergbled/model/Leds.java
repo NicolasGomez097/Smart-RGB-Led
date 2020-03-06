@@ -1,27 +1,30 @@
 package com.example.programablergbled.model;
 
 
+import androidx.annotation.Size;
+
 import com.example.programablergbled.Utils.Parser;
 
 import java.util.ArrayList;
 
 public class Leds {
 
-    private byte LEDS_SEPARATOR = (byte)255;
-    private byte LEDS_SUM_SEPARATOR = (byte)254;
+    private byte LEDS_INDEX_SEPARATOR = (byte)0;
 
-    private Color leds[];
+    private HSVInteger leds[];
     private int ledsNum;
 
     public Leds(int ledsNum){
         this.ledsNum = ledsNum;
-        leds = new Color[ledsNum];
+        leds = new HSVInteger[ledsNum];
     }
 
-    public boolean setColor(int numLed, int rgb[]){
-        if(rgb.length != 3)
+    public boolean setColor(int numLed,@Size(3) byte hsv[]){
+        if(hsv.length != 3)
             return false;
-        leds[numLed] = new Color(rgb[0],rgb[1],rgb[2]);
+        if(numLed >= ledsNum)
+            return false;
+        leds[numLed] = new HSVInteger(hsv[0],hsv[1],hsv[2]);
         return true;
     }
 
@@ -30,9 +33,9 @@ public class Leds {
         byte[] out;
         aux.add((byte)'P');
         aux.add(Integer.valueOf(0).byteValue());
-        aux.add(LEDS_SUM_SEPARATOR);
+        aux.add(LEDS_INDEX_SEPARATOR);
         aux.add(Integer.valueOf(ledsNum-1).byteValue());
-        aux.add(Integer.valueOf(0).byteValue());
+        aux.add(Integer.valueOf(1).byteValue());
         aux.add(Integer.valueOf(0).byteValue());
         aux.add(Integer.valueOf(0).byteValue());
         out = Parser.arrayListToByteArray(aux);
@@ -42,36 +45,39 @@ public class Leds {
     public byte[] getBytes(){
         ArrayList<Byte> aux = new ArrayList<>();
         byte[] out;
-        Integer sameColors = 0;
-        Color lastColor = null;
+        Integer colorCount = 0;
+        HSVInteger lastColor = null;
 
         for(int i=0; i < ledsNum; i++){
-            if(leds[i] == null && sameColors == 0)
+            if(leds[i] == null && colorCount == 0)
                 continue;
 
-            if(sameColors == 0){
+            if(colorCount == 0){
                 lastColor = leds[i];
+                colorCount++;
+                continue;
             }
 
             if(lastColor.equal(leds[i])){
-                sameColors++;
+                colorCount++;
                 continue;
             }else{
-                addLedsToArray(aux,lastColor,i,sameColors);
+                if(colorCount == 1)
+                    addLedsToArray(aux,lastColor,i-colorCount);
+                else
+                    addLedsToArray(aux,lastColor,i-colorCount,i-1);
 
                 if(leds[i] == null)
-                    sameColors = 0;
+                    colorCount = 0;
                 else
-                    sameColors = 1;
+                    colorCount = 1;
+
                 lastColor = leds[i];
             }
         }
-        if(sameColors != 0){
-            addLedsToArray(aux,lastColor,ledsNum,sameColors);
+        if(colorCount != 0){
+            addLedsToArray(aux,lastColor,ledsNum,colorCount);
         }
-
-        if(aux.get(aux.size()-1) == (byte)255)
-            aux.remove(aux.size()-1);
 
         if(aux.size() == 0)
             return null;
@@ -80,17 +86,24 @@ public class Leds {
         return out;
     }
 
-    private void addLedsToArray(ArrayList<Byte> list,Color color, Integer pos,Integer count){
-        list.add(Integer.valueOf(pos-count).byteValue());
-        if(count > 1){
-            list.add(LEDS_SUM_SEPARATOR);
-            list.add(Integer.valueOf(count-1).byteValue());
+    private void addLedsToArray(ArrayList<Byte> list, HSVInteger color, Integer startIndex, Integer endIndex){
+        list.add(Integer.valueOf(startIndex).byteValue());
+        if(endIndex > 1){
+            list.add(LEDS_INDEX_SEPARATOR);
+            list.add(Integer.valueOf(endIndex).byteValue());
         }
-        byte rgb[] = color.getRGB();
-        list.add(rgb[0]);
-        list.add(rgb[1]);
-        list.add(rgb[2]);
-        list.add(LEDS_SEPARATOR);
+        byte hsv[] = color.getHSV();
+        list.add(hsv[1]);
+        list.add(hsv[0]);
+        list.add(hsv[2]);
+    }
+
+    private void addLedsToArray(ArrayList<Byte> list, HSVInteger color, Integer startIndex){
+        list.add(Integer.valueOf(startIndex).byteValue());
+        byte hsv[] = color.getHSV();
+        list.add(hsv[1]);
+        list.add(hsv[0]);
+        list.add(hsv[2]);
     }
 
 

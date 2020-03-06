@@ -8,6 +8,7 @@
 #define REAL_LEDS_NUM NUM_LEDS*LED_OFFSET
 #define LED_TYPE WS2812B
 #define LED_OFF 0x000000
+#define INDEX_SEPARATOR 0
 
 SoftwareSerial hc06(2,3);
 
@@ -23,7 +24,8 @@ void checkInput();
 void readPattern();
 void turnOffLeds();
 void patronReconocimineto();
-void setColor(int index,CRGB color);
+void setColorRGB(int index,CRGB color);
+void setColorHSV(int index,CHSV color);
 
 void setup(){
 
@@ -33,6 +35,7 @@ void setup(){
 }
 
 void loop(){
+
   checkInput();
   if(new_pattern){
     FastLED.show();
@@ -67,7 +70,11 @@ void loop(){
   FastLED.show(); */
 }
 
-void setColor(int index,CRGB color){
+void setColorRGB(int index,CRGB color){
+  leds[index*LED_OFFSET] = color;
+}
+
+void setColorHSV(int index,CHSV color){
   leds[index*LED_OFFSET] = color;
 }
 
@@ -77,7 +84,7 @@ void checkInput(){
   while(hc06.available()){
     buffer = hc06.read();
     delay(10);
-    Serial.write(buffer);
+    Serial.println(buffer);
     if(buffer == 'Y'){
       //leds_on = true;
     }else if(buffer == 'N'){
@@ -107,73 +114,80 @@ void checkInput(){
 
 void turnOffLeds(){
   for(int i=0; i < NUM_LEDS; i++){
-    setColor(i,LED_OFF);
+    setColorRGB(i,LED_OFF);
   }
   FastLED.show();
 }
 
+/*  
+  El patron que se debe enviar debe comenzar con una 'P' seguido de 
+el indice del led que se establecera el color enviado.
+  Si se envia el valor '0'despues del indice se debe pasar el indice 
+final el cual se establecera el color a todos los led dentro del rango.
+  Luego de los indices se deba pasar la saturacion, el HUE, y el valor,
+como no se utiliza el '0' para determinar un rango de Leds, el valor de 
+la saturacion es de 1 a 255.
+  Patrones ejemplo:
+P 0 255 0 255 1 255 150 255 = P index saturacion hue value index saturacion hue value
+P 0 0 10 255 0 255 11 0 15 255 100 255 = P index separador endIndex saturacion hue value index separador endIndex saturacion hue value
+
+  Si llega un indice mayor a la cantidad de led establecida se terminara el proceso de lectura y se vaciará el buffer.
+*/
 void readPattern(){
   int index = 0;
   byte buffer = 'q';
   //Se tienene que reiniciar cuando se lee toda la informacion de un led.
-  int sum = 0;
+  int endIndex = 0;
   int count = 0;
-  bool isSum = false;
+  bool hasMoreIndex = false;
   bool isOneReadComplete = false;
+  bool edited = false;
   // fin del bloque.
-  int r,g,b;
+  int h,s,v;
   while(hc06.available()){
-    buffer = hc06.read();
-    if(buffer == 255)
-      continue;
-    if(buffer == 80){
-      hc06.flush();
-      break;
-    }
-    
+    buffer = hc06.read();    
     Serial.println(buffer);
 
     if(count == 0){
       index = buffer;
+      if(index > NUM_LEDS)
+        break;
       count++;
-    }else if(buffer == 254){
-      isSum = true;
-    }else if(isSum){
-      sum = buffer;
-      isSum = false;
+    }else if(buffer == INDEX_SEPARATOR && count == 1){
+      hasMoreIndex = true;
+    }else if(hasMoreIndex){
+      endIndex = buffer;
+      if(endIndex >= NUM_LEDS)
+        break;
+      hasMoreIndex = false;
     }else{
       if(count == 1)
-        r = buffer;
+        s = buffer;
       else if(count == 2)
-        g = buffer;
+        h = buffer;
       else{
-        b = buffer;
+        v = buffer;
         isOneReadComplete = true;
+        if(endIndex == 0)
+          endIndex = index;
       }
       count++;
     }  
 
     if(isOneReadComplete){
-      sum = index + sum + 1;
-      String variables = "variables: ";
-      String msg = variables + "sum: " + sum + ", " + "index: " + index;
-      Serial.println(msg);
-
-      
-      
-      for(int i = index; i < sum; i++){
-        String led = "led ";
-        String s = led + i +": " + r + ", " + g + ", " + b;
-        Serial.println(s);
-        setColor(i,CRGB(r,g,b));
+      for(int i = index; i <= endIndex; i++){
+          setColorHSV(i,CHSV(h,s,v));
       }
-      sum = 0;
+      
+      endIndex = 0;
       count = 0;
-      isSum = false;
+      hasMoreIndex = false;
       isOneReadComplete = false;
+      edited = true;
     }  
   }
-  new_pattern = true;
+  if(edited)
+    new_pattern = true;
 }
 
 void patronReconocimineto(){
@@ -186,9 +200,9 @@ void patronReconocimineto(){
     }
     rest = aux%2;
     if(rest == 1)
-      setColor(i,CRGB(0,150,0));
+      setColorRGB(i,CRGB(0,255,0));
     else
-      setColor(i,CRGB(150,0,0));
+      setColorRGB(i,CRGB(255,0,0));
   }
   FastLED.show();
   isDetecting = false;

@@ -22,6 +22,8 @@ import top.defaults.colorpicker.ColorPickerPopup;
 
 public class FragmentPattern extends Fragment {
 
+    private int LED_COUNT = 10;
+
     private FragmentPatternHandler handler;
 
     private View fragment_container;
@@ -32,6 +34,8 @@ public class FragmentPattern extends Fragment {
     private Button reconocimientoOn;
     private Button reconocimientoOff;
     private Button next;
+
+
 
     public interface FragmentPatternHandler{
         void onExitFragmentPattern();
@@ -46,9 +50,9 @@ public class FragmentPattern extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         fragment_container = inflater.inflate(R.layout.fragment_pattern,container,false);
 
-        /*if(!Builder.getBluetoothConnection().isConnected()){
+        if(!Builder.getBluetoothConnection().isConnected()){
             handler.onExitFragmentPattern();
-        }*/
+        }
 
         encender = fragment_container.findViewById(R.id.encender);
         apagar = fragment_container.findViewById(R.id.apagar);
@@ -119,7 +123,7 @@ public class FragmentPattern extends Fragment {
     }
 
     private void apagarLeds() {
-        Leds l = new Leds(4);
+        Leds l = new Leds(LED_COUNT);
         byte leds[] = l.turnOff();
         System.out.print("Test:LedsProtocol OFF ");
         for(byte b: leds){
@@ -132,20 +136,32 @@ public class FragmentPattern extends Fragment {
     }
 
     private void encederLeds() {
-        Leds l = new Leds(4);
+        int auxH, auxS, auxV;
+
+        Leds l = new Leds(LED_COUNT);
         int i = Integer.parseInt(index.getText().toString());
-        /*int r = Integer.parseInt(red.getText().toString());
-        int g = Integer.parseInt(green.getText().toString());
-        int b = Integer.parseInt(blue.getText().toString());*/
-        if(i > 3)
-            i = 3;
+
+        if(i > LED_COUNT)
+            i = LED_COUNT;
         if(i < 0)
             i = 0;
-        l.setColor(i,new int[]{r,g,b});
+
+        auxH = Parser.parseRange(Float.parseFloat(red.getText().toString()),
+                0,360,0,255);
+        auxS = Parser.parseRange(Float.parseFloat(green.getText().toString()),
+                0,1,1,255);
+        auxV = Parser.parseRange(Float.parseFloat(blue.getText().toString()),
+                0,1,0,255);
+
+        byte h = (byte) Math.round(auxH);
+        byte s = (byte) Math.round(auxS);
+        byte v = (byte) Math.round(auxV);
+
+        l.setColor(i,new byte[]{h,s,v});
         System.out.print("Test:LedsProtocol ON ");
         byte leds[] = l.getBytes();
         for(byte by: leds){
-            System.out.print(Parser.getStringCharProtocol(by));
+            System.out.print(Parser.getStringCharProtocol(by)+" ");
         }
         System.out.println();
         Builder.getBluetoothUtils().bluetoothSendData(leds,
@@ -170,6 +186,5 @@ public class FragmentPattern extends Fragment {
                 getString(R.string.turned_on),
                 getString(R.string.could_not_turn_on));
     }
-
 
 }

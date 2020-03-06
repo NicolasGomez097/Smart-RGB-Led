@@ -16,16 +16,14 @@ public class Parser {
     }
 
     public static String getStringCharProtocol(byte b){
-        if(b == (byte)255)
-            return "-";
 
-        if(b == (byte)254)
+        if(b == 0)
             return "+";
 
         return Integer.toString(b & 0xff);
     }
 
-    public int parseRange(int value, int min, int max, int newMin, int newMax){
-        return newMin+((value-min)*(newMax-newMin))/(max-min);
+    public static int parseRange(float value, float min, float max, float newMin, float newMax){
+        return Math.round(newMin+((value-min)*(newMax-newMin))/(max-min));
     }
 }
