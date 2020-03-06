@@ -61,4 +61,8 @@ public class Blob {
         int dist4 = (int)(Math.sqrt(Math.pow(min.x-x,2.0)+ Math.pow(max.y-y,2.0)));
         return Math.min(Math.min(dist1,dist2), Math.min(dist3,dist4));
     }
+
+    public int getSize(){
+        return getWidth()*getHeight();
+    }
 }

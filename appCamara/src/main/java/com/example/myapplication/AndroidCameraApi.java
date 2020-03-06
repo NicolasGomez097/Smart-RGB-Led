@@ -168,7 +168,7 @@ public class AndroidCameraApi extends AppCompatActivity {
 
                     Bitmap aux = b.copy(Bitmap.Config.ARGB_8888,true);
 
-                    runOnUiThread(new Runnable() {
+                    /*runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
 
@@ -176,14 +176,14 @@ public class AndroidCameraApi extends AppCompatActivity {
 
 
                         }
-                    });
+                    });*/
 
                     int pixels[] = new int[b.getWidth()*b.getHeight()];
                     aux.getPixels(pixels, 0, b.getWidth(), 0, 0, b.getWidth(), b.getHeight());
 
                     ArrayList<Blob> list = BlobUtils.getBlobs(pixels,b.getWidth(),b.getHeight());
                     showBlobls(list,new Size(b.getWidth(),b.getHeight()));
-                    System.out.println("Blobs size: "+list.size());
+                    //System.out.println("Blobs size: "+list.size());
                     fpsCounter.setText(""+((System.currentTimeMillis()-time)*60*60)/1000);
                 }
             },mBackgroundHandler);
@@ -223,7 +223,7 @@ public class AndroidCameraApi extends AppCompatActivity {
 
             Size sizes[] = map.getOutputSizes(SurfaceTexture.class);
             for(Size s: sizes){
-                if(s.getWidth() == 800 || s.getHeight() == 800)
+                if(s.getWidth() == 1280 || s.getHeight() == 720)
                     imageDimension = s;
             }
             if(imageDimension == null)
@@ -301,8 +301,9 @@ public class AndroidCameraApi extends AppCompatActivity {
             }
         });
 
-        for(int i = 0; i < blobs.size() && i < 10;i++){
-            final Blob blob = blobs.get(i);
+        for(final Blob blob: blobs){
+            if(blob.getSize() < 100)
+                continue;
             Vector2D<Integer> center = blob.getCenter();
 
             final float resolution_factor_x = 1.0f*blobContainer.getWidth()/image.getWidth();

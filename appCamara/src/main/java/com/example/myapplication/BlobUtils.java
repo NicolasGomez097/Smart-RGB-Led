@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class BlobUtils {
 
     private static int COLOR_THRESHOLD = 50;
-    private static int DISTANCE_THRESHOLD = 15;
+    private static int DISTANCE_THRESHOLD = 20;
 
 
     public static ArrayList<Blob> getBlobs(int[] pixels, int width, int height){
@@ -67,6 +67,7 @@ public class BlobUtils {
                 aux = null;
             }
         redBlobs.addAll(greenBlobs);
+
 
         return redBlobs;
     }
